@@ -63,18 +63,10 @@ BSON.@save "mlp_model.bson" MLP
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
 
-using Plots
-# Plotting the training and validation loss
-plot(1:length(train_loss), train_loss, label="Training Loss", color=:blue)
-plot!(1:length(validation_loss), validation_loss, label="Validation Loss", color=:red, linestyle=:dash)
-xlabel!("Epochs")
-ylabel!("Loss")
-title!("Training and Validation Loss")
-
-# Use 10 samples for testing
+# Using 50 samples for testing
 test_indices = 1:50  # Extract indices for the first 10 samples
-new_data = X[:, test_indices]  # Extract 10 samples (shape: 8x10 for 8 features)
-true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x10)
+new_data = X[:, test_indices]  # Extract 50 samples (shape: 8x50 for 8 features)
+true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x50)
 
 # Get predictions for the new data
 predictions = MLP(new_data)
@@ -82,6 +74,7 @@ predictions = MLP(new_data)
 # Calculate mean squared error for the 10 test samples
 mse_test = Flux.Losses.mse(predictions, true_values)
 
+println("Final ")
 println("New Data (Input):")
 println(new_data)
 println("\nTrue Values (Expected):")

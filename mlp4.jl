@@ -13,10 +13,11 @@ y = select(df, :Outcome) |> Matrix |> transpose
 
 println(size(X))  # Output will be (num_features, num_samples)
 
-MLP = Chain(Dense(8=>200), gelu, 
-            Dense(200=>200), gelu, 
-            Dense(200=>1))
-            
+MLP = Chain(Dense(8, 50, gelu), Dropout(0.25),
+            Dense(50, 500, gelu), Dropout(0.25),
+            Dense(500, 200, gelu), Dropout(0.25),
+            Dense(200, 1))
+    
 train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false);
 val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
 ##Objective functions: weights ---> loss
@@ -59,15 +60,15 @@ end
 end_time = time()
 
 using BSON
-BSON.@save "mlp_model2.bson" MLP
+BSON.@save "mlp_model4.bson" MLP
 
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
 
 # Use 50 samples for testing
 test_indices = 1:50  # Extract indices for the first 50 samples
-new_data = X[:, test_indices]  # Extract 50 samples (shape: 8x50 for 8 features)
-true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x50)
+new_data = X[:, test_indices]  # Extract 50 samples (shape: 8x10 for 8 features)
+true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x10)
 
 # Get predictions for the new data
 predictions = MLP(new_data)

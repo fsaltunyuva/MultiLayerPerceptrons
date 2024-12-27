@@ -15,7 +15,8 @@ println(size(X))  # Output will be (num_features, num_samples)
 
 MLP = Chain(Dense(8=>50), gelu, 
             Dense(50=>500), gelu, 
-            Dense(500=>1))
+            Dense(500=>200), gelu,
+            Dense(200=>1))
             
 train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false);
 val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
@@ -64,15 +65,15 @@ BSON.@save "mlp_model3.bson" MLP
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
 
-# Use 10 samples for testing
-test_indices = 1:50  # Extract indices for the first 10 samples
-new_data = X[:, test_indices]  # Extract 10 samples (shape: 8x10 for 8 features)
-true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x10)
+# Use 50 samples for testing
+test_indices = 1:50  # Extract indices for the first 50 samples
+new_data = X[:, test_indices]  # Extract 50 samples (shape: 8x50 for 8 features)
+true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x50)
 
 # Get predictions for the new data
 predictions = MLP(new_data)
 
-# Calculate mean squared error for the 10 test samples
+# Calculate mean squared error for the 50 test samples
 mse_test = Flux.Losses.mse(predictions, true_values)
 
 println("New Data (Input):")
