@@ -20,8 +20,8 @@ train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false
 val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
 ##Objective functions: weights ---> loss
 
-optim = Flux.setup(Flux.Adam(0.00001), MLP)  # will store optimiser momentum, etc.
-
+optim = Flux.setup(Flux.AdamW(0.00001), MLP)  # will store optimiser momentum, etc.
+ 
 using StatsBase
 
 train_loss = []
@@ -54,7 +54,7 @@ for epoch in iter
 end
 
 using BSON
-BSON.@save "mlp_model.bson" MLP
+BSON.@save "mlp_model2.bson" MLP
 
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
