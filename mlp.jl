@@ -31,6 +31,8 @@ validation_loss = []
 using ProgressMeter, ProgressBars, Printf
 iter = ProgressBar(1:1_000)
 
+start_time = time()
+
 for epoch in iter
     for (x, y) in train_data
         ## If you like carry training on GPU,
@@ -53,14 +55,24 @@ for epoch in iter
     end
 end
 
+end_time = time()
+
 using BSON
 BSON.@save "mlp_model.bson" MLP
 
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
 
+using Plots
+# Plotting the training and validation loss
+plot(1:length(train_loss), train_loss, label="Training Loss", color=:blue)
+plot!(1:length(validation_loss), validation_loss, label="Validation Loss", color=:red, linestyle=:dash)
+xlabel!("Epochs")
+ylabel!("Loss")
+title!("Training and Validation Loss")
+
 # Use 10 samples for testing
-test_indices = 1:10  # Extract indices for the first 10 samples
+test_indices = 1:50  # Extract indices for the first 10 samples
 new_data = X[:, test_indices]  # Extract 10 samples (shape: 8x10 for 8 features)
 true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x10)
 
@@ -76,4 +88,5 @@ println("\nTrue Values (Expected):")
 println(true_values)
 println("\nPredictions:")
 println(predictions)
-println("\nMean Squared Error for 10 Samples: ", mse_test)
+println("\nMean Squared Error for 50 Samples: ", mse_test)
+println("Total training time: ", end_time - start_time, " seconds")

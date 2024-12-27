@@ -13,9 +13,9 @@ y = select(df, :Outcome) |> Matrix |> transpose
 
 println(size(X))  # Output will be (num_features, num_samples)
 
-MLP = Chain(Dense(8=>200), gelu, 
-            Dense(200=>200), gelu, 
-            Dense(200=>1))
+MLP = Chain(Dense(8=>50), gelu, 
+            Dense(50=>500), gelu, 
+            Dense(500=>1))
             
 train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false);
 val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
@@ -59,7 +59,7 @@ end
 end_time = time()
 
 using BSON
-BSON.@save "mlp_model2.bson" MLP
+BSON.@save "mlp_model3.bson" MLP
 
 # Load trained model
 # BSON.@load "mlp_model.bson" MLP
