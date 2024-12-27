@@ -1,21 +1,23 @@
 using Flux
 using NNlib
+using CSV
+using DataFrames
 
+df = CSV.File("diabetes.csv") |> DataFrame
 
-X = randn(100,1000) ### Here the number of samples is 100, the number of features is 10!!!
-y = randn(1, 1000)
+println(first(df, 5))  # Show the first 5 rows to understand the data
 
-MLP = Chain(Dense(100=>200), gelu, 
+X = select(df, Not(:Outcome)) |> Matrix |> transpose
+y = select(df, :Outcome) |> Matrix |> transpose
+
+println(size(X))  # Output will be (num_features, num_samples)
+
+MLP = Chain(Dense(8=>200), gelu, 
             Dense(200=>200), gelu, 
             Dense(200=>1))
             
 train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false);
-
-for (x,y) in train_data
-    println(x |> size, y |> size)
-end
-
-val_data = Flux.DataLoader((randn(100,1000), randn(1, 1000)), batchsize=64, shuffle=true);
+val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
 ##Objective functions: weights ---> loss
 
 optim = Flux.setup(Flux.Adam(0.00001), MLP)  # will store optimiser momentum, etc.
@@ -28,6 +30,7 @@ validation_loss = []
 # Training loop, using the whole data set 1000 times:
 using ProgressMeter, ProgressBars, Printf
 iter = ProgressBar(1:1_000)
+
 for epoch in iter
     for (x, y) in train_data
         ## If you like carry training on GPU,
@@ -54,8 +57,18 @@ using BSON
 BSON.@save "mlp_model.bson" MLP
 
 # Load trained model
-BSON.@load "mlp_model.bson" MLP
+# BSON.@load "mlp_model.bson" MLP
 
-new_data = randn(100, 5)  # Example: 5 new samples with 100 features each
+# Use the first 5 samples for testing
+new_data = X[:, 1:5]  # Extract 5 samples (shape will be 10x5 for 10 features)
+true_values = y[:, 1:5]  # Corresponding true target values (shape will be 1x5)
 
+# Get predictions from the trained model
 predictions = MLP(new_data)
+
+println("New Data (Input):")
+println(new_data)
+println("\nTrue Values (Expected):")
+println(true_values)
+println("\nPredictions:")
+println(predictions)
