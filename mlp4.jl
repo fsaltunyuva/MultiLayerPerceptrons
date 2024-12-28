@@ -4,83 +4,93 @@ using CSV
 using DataFrames
 using Plots
 
-df = CSV.File("diabetes.csv") |> DataFrame
+df = CSV.File("diabetes.csv") |> DataFrame # Loading the data from the CSV file
 
-println(first(df, 5))  # Show the first 5 rows to understand the data
+println(first(df, 5))  # Showing the first 5 rows to understand the data
 
+# Extracting the features and target values from the Dataframe
 X = select(df, Not(:Outcome)) |> Matrix |> transpose
 y = select(df, :Outcome) |> Matrix |> transpose
 
-println(size(X))  # Output will be (num_features, num_samples)
+println(size(X))  # Output will be: features, samples
 
+# Defining the MLP model with gelu activation function (with dropout layers)
 MLP = Chain(Dense(8, 50, gelu), Dropout(0.25),
-            Dense(50, 500, gelu), Dropout(0.25),
-            Dense(500, 200, gelu), Dropout(0.25),
-            Dense(200, 1))
-    
-train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial = false);
+    Dense(50, 500, gelu), Dropout(0.25),
+    Dense(500, 200, gelu), Dropout(0.25),
+    Dense(200, 1))
+
+# Creating data loaders for training and validation
+train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial=false);
 val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
-##Objective functions: weights ---> loss
 
-optim = Flux.setup(Flux.AdamW(0.00001), MLP)  # will store optimiser momentum, etc.
+optim = Flux.setup(Flux.AdamW(0.00001), MLP)  # AdamW optimizer with learning rate 0.00001
 
-using StatsBase
-
-train_loss = []
-validation_loss = []
-
-# Training loop, using the whole data set 1000 times:
 using ProgressMeter, ProgressBars, Printf
-iter = ProgressBar(1:1_000)
+iter = ProgressBar(1:1_000) # Progress bar for 1000 epochs
 
-start_time = time()
+start_time = time() # Start time for training
+
+train_loss_for_each_epoch = [] # Store training loss for each epoch
+validation_loss_for_each_epoch = [] # Store validation loss for each epoch
 
 for epoch in iter
+    train_loss_for_current_epoch = [] # Store training loss for each batch
+    validation_loss_for_current_epoch = [] # Store validation loss for each batch
+
+    # Training loop for each batch (same as 0-hellodude.jl on LMS)
     for (x, y) in train_data
-        ## If you like carry training on GPU,
-        ## x,y = x |> gpu, y |>gpu
         loss_train, grads = Flux.withgradient(MLP) do m
-            # Evaluate model and loss inside gradient context:
             y_hat = m(x)
             Flux.Losses.mse(y_hat, y)
-            
-    end
-        push!(train_loss, loss_train)
+        end
         Flux.update!(optim, MLP, grads[1])
-    for (x, y) in val_data
-            y_hat = MLP(x)
-            loss_val = Flux.Losses.mse(y_hat, y)
-            push!(validation_loss, loss_val)   
+        push!(train_loss_for_current_epoch, loss_train)
     end
-    set_postfix(iter, Loss=  @sprintf("%.4f, %.4f", mean(loss_train), mean(validation_loss)))
 
+    for (x, y) in val_data
+        y_hat = MLP(x)
+        loss_val = Flux.Losses.mse(y_hat, y)
+        push!(validation_loss_for_current_epoch, loss_val)
     end
+
+    # Storing the mean loss for each epoch to plot the loss curves later
+    push!(train_loss_for_each_epoch, mean(train_loss_for_current_epoch))
+    push!(validation_loss_for_each_epoch, mean(validation_loss_for_current_epoch))
+
+    # Update the progress bar with the current loss values (by using the last element of the arrays)
+    set_postfix(iter, Loss=@sprintf("%.4f, %.4f", train_loss_for_each_epoch[end], validation_loss_for_each_epoch[end]))
 end
 
-end_time = time()
+end_time = time() # End time for training
 
-using BSON
-BSON.@save "mlp_model4.bson" MLP
+# To save the trained model
+# using BSON
+# BSON.@save "mlp_model.bson" MLP
 
-# Load trained model
+# To load the trained model
 # BSON.@load "mlp_model.bson" MLP
 
-# Use 50 samples for testing
-test_indices = 1:50  # Extract indices for the first 50 samples
-new_data = X[:, test_indices]  # Extract 50 samples (shape: 8x10 for 8 features)
-true_values = y[:, test_indices]  # Corresponding true target values (shape: 1x10)
+# Plotting the loss curves
+plot(1:1_000, train_loss_for_each_epoch, label="Training Loss", lw=2, color=:blue) # Plot training loss 
+plot!(1:1_000, validation_loss_for_each_epoch, label="Validation Loss", lw=2, color=:red) # Plot validation loss
+xlabel!("Epochs") # Label x-axis
+ylabel!("Loss") # Label y-axis
+title!("Training and Validation Loss") # Title of the plot
 
-# Get predictions for the new data
-predictions = MLP(new_data)
+# Using 50 samples for testing
+new_data = X[:, 1:50]  # Extracting 50 samples
+true_values = y[:, 1:50]  # Corresponding true values
 
-# Calculate mean squared error for the 50 test samples
-mse_test = Flux.Losses.mse(predictions, true_values)
+predictions = MLP(new_data) # Predictions for the 50 samples
 
-println("New Data (Input):")
-println(new_data)
-println("\nTrue Values (Expected):")
+mse_test = Flux.Losses.mse(predictions, true_values) # Mean squared error for the 50 samples
+
+println("True Values (Expected):")
 println(true_values)
-println("\nPredictions:")
+println("")
+println("Predictions:")
 println(predictions)
-println("\nMean Squared Error for 50 Samples: ", mse_test)
+println("")
+println("Mean Squared Error for 50 Samples: ", mse_test)
 println("Total training time: ", end_time - start_time, " seconds")
