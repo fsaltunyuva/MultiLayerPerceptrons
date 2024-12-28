@@ -15,22 +15,22 @@ Implementing and training 4 different Multilayer Perceptrons by experimenting wi
 
 **Mean Squared Error for 50 Samples: 0.19419284**
 
-![image](https://github.com/user-attachments/assets/5e875566-5e8a-45be-85f4-063bae2f7785)
+<img src="https://github.com/user-attachments/assets/5e875566-5e8a-45be-85f4-063bae2f7785" width="600">
 
 ### Test 2 (mlp2.jl)
 
 **Mean Squared Error for 50 Samples: 0.17498024**
 
-![image](https://github.com/user-attachments/assets/6b9f7571-c85d-4a65-9489-ed65ea252f26)
+<img src="https://github.com/user-attachments/assets/6b9f7571-c85d-4a65-9489-ed65ea252f26" width="600">
 
 ### Test 3 (mlp3.jl)
 
 **Mean Squared Error for 50 Samples: 0.14550991**
 
-![image](https://github.com/user-attachments/assets/517d0282-3af6-46e7-b936-89cc28e77af5)
+<img src="https://github.com/user-attachments/assets/517d0282-3af6-46e7-b936-89cc28e77af5" width="600">
 
 ### Test 4 (mlp4.jl)
 
 **Mean Squared Error for 50 Samples: 0.3080534**
 
-![image](https://github.com/user-attachments/assets/08ec805b-c715-4e19-a783-7cc467f33202)
+<img src="[https://github.com/user-attachments/assets/5e875566-5e8a-45be-85f4-063bae2f7785](https://github.com/user-attachments/assets/08ec805b-c715-4e19-a783-7cc467f33202)" width="600">
