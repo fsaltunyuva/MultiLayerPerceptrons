@@ -21,7 +21,7 @@ MLP = Chain(Dense(8 => 200), gelu,
 
 # Creating data loaders for training and validation
 train_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true, partial=false);
-val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true)
+val_data = Flux.DataLoader((X, y), batchsize=64, shuffle=true);
 
 optim = Flux.setup(Flux.AdamW(0.00001), MLP)  # AdamW optimizer with learning rate 0.00001
 
