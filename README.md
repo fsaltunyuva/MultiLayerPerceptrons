@@ -33,4 +33,4 @@ Implementing and training 4 different Multilayer Perceptrons by experimenting wi
 
 **Mean Squared Error for 50 Samples: 0.3080534**
 
-<img src="[https://github.com/user-attachments/assets/5e875566-5e8a-45be-85f4-063bae2f7785](https://github.com/user-attachments/assets/08ec805b-c715-4e19-a783-7cc467f33202)" width="600">
+<img src="https://github.com/user-attachments/assets/5e875566-5e8a-45be-85f4-063bae2f7785" width="600">
